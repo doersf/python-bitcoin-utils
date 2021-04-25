@@ -21,7 +21,8 @@ setup(name='bitcoin-utils',
       keywords='bitcoin library utilities tools',
       install_requires=[
           'base58check==1.0.2',
-          'ecdsa==0.16.1'
+          'ecdsa==0.16.1',
+          'sympy==1.3'
       ],
       packages=['bitcoinutils'],
       #package_data={
