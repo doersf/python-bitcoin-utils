@@ -416,32 +416,8 @@ class PublicKey:
             # remove first byte and instantiate ecdsa key
             self.key = VerifyingKey.from_string(hex_bytes[1:], curve=SECP256k1)
         else:
-            # compressed - SEC FORMAT: 0x02|0x03 + x coordinate (if 02 then y
-            # is even else y is odd. Calculate y and then instantiate the ecdsa key
-            x_coord = int( hex_str[2:], 16 )
-
-            # y = modulo_square_root( (x**3 + 7) mod p ) -- there will be 2 y values
-            y_values = sqrt_mod( (x_coord**3 + 7) % _p, _p, True )
-
-            # check SEC format's first byte to determine which of the 2 values to use
-            if first_byte_in_hex == '02':
-                # y is the even value
-                if y_values[0] % 2 == 0:
-                    y_coord = y_values[0]
-                else:
-                    y_coord = y_values[1]
-            elif first_byte_in_hex == '03':
-                # y is the odd value
-                if y_values[0] % 2 == 0:
-                    y_coord = y_values[1]
-                else:
-                    y_coord = y_values[0]
-            else:
-                raise TypeError("Invalid SEC compressed format")
-
-            uncompressed_hex = "%0.64X%0.64X" % (x_coord, y_coord)
-            uncompressed_hex_bytes = unhexlify(uncompressed_hex)
-            self.key = VerifyingKey.from_string(uncompressed_hex_bytes, curve=SECP256k1)
+            # compressed - let the ECDSA do its thing
+            self.key = VerifyingKey.from_string(hex_bytes, curve=SECP256k1)
 
 
     @classmethod
@@ -464,14 +440,9 @@ class PublicKey:
         key_hex = hexlify(self.key.to_string())
 
         if compressed:
-            # check if y is even or odd (02 even, 03 odd)
-            if int(key_hex[-2:], 16) % 2 == 0:
-                key_str = b'02' + key_hex[:64]
-            else:
-                key_str = b'03' + key_hex[:64]
+            key_str = hexlify(self.key.to_string(encoding="compressed"))
         else:
-            # uncompressed starts with 04
-            key_str = b'04' + key_hex
+            key_str = hexlify(self.key.to_string(encoding="uncompressed"))
 
         return key_str.decode('utf-8')
 
