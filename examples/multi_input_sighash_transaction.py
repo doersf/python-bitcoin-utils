@@ -29,12 +29,12 @@ def main():
 
     # create transaction output using P2PKH scriptPubKey (locking script)
     addr = P2pkhAddress('myPAE9HwPeKHh8FjKwBNBaHnemApo3dw6e')
-    txout = TxOutput(to_satoshis(0.3), Script(['OP_DUP', 'OP_HASH160', addr.to_hash160(),
+    txout = TxOutput(to_satoshis('0.3'), Script(['OP_DUP', 'OP_HASH160', addr.to_hash160(),
                                     'OP_EQUALVERIFY', 'OP_CHECKSIG']) )
 
     # create another output to get the change - remaining 0.01 is tx fees
     change_addr = P2pkhAddress('mmYNBho9BWQB2dSniP1NJvnPoj5EVWw89w')
-    change_txout = TxOutput(to_satoshis(0.08), Script(['OP_DUP', 'OP_HASH160',
+    change_txout = TxOutput(to_satoshis('0.08'), Script(['OP_DUP', 'OP_HASH160',
                                            change_addr.to_hash160(),
                                            'OP_EQUALVERIFY', 'OP_CHECKSIG']) )
 

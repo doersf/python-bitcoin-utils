@@ -31,13 +31,13 @@ def main():
     inp = TxInput('95c5cac558a8b47436a3306ba300c8d7af4cd1d1523d35da3874153c66d99b09', 0)
 
     # exact amount of UTXO we try to spent
-    amount = 0.0014
+    amount = '0.0014'
 
     # the address to send funds to
     to_addr = P2pkhAddress('mvBGdiYC8jLumpJ142ghePYuY8kecQgeqS')
 
     # the output sending 0.001 -- 0.0004 goes to miners as fee -- no change
-    out = TxOutput(to_satoshis(0.001), to_addr.to_script_pub_key())
+    out = TxOutput(to_satoshis('0.001'), to_addr.to_script_pub_key())
 
     # create a tx with at least one segwit input
     tx = Transaction([inp], [out], has_segwit=True)

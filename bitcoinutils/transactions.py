@@ -11,8 +11,8 @@
 
 import math
 import hashlib
-import struct
 from binascii import unhexlify, hexlify
+from bitcoinutils.utils import encode_var_int
 
 from bitcoinutils.constants import DEFAULT_TX_SEQUENCE, DEFAULT_TX_LOCKTIME, \
                     DEFAULT_TX_VERSION, NEGATIVE_SATOSHI, \
@@ -77,12 +77,10 @@ class TxInput:
         # - note that we reverse the byte order for the tx hash since the string
         #   was displayed in little-endian!
         # - note that python's struct uses little-endian by default
-        txid_bytes = unhexlify(self.txid)[::-1]
-        txout_bytes = struct.pack('<L', self.txout_index)
+        txid_bytes = (int(self.txid,16)).to_bytes(32, byteorder="little")
+        txout_bytes = (self.txout_index).to_bytes(4, byteorder="little")
         script_sig_bytes = self.script_sig.to_bytes()
-        data = txid_bytes + txout_bytes + \
-                struct.pack('B', len(script_sig_bytes)) + \
-                script_sig_bytes + self.sequence
+        data = txid_bytes + txout_bytes + encode_var_int(len(script_sig_bytes)) + script_sig_bytes + self.sequence
         return data
 
 
@@ -116,7 +114,6 @@ class TxOutput:
 
     def __init__(self, amount, script_pubkey):
         """See TxOutput description"""
-
         if not isinstance(amount, int):
             raise TypeError("Amount needs to be in satoshis as an integer")
 
@@ -129,10 +126,9 @@ class TxOutput:
 
         # internally all little-endian except hashes
         # note struct uses little-endian by default
-
-        amount_bytes = struct.pack('<q', self.amount)
+        amount_bytes = (self.amount).to_bytes(8, byteorder="little")
         script_bytes = self.script_pubkey.to_bytes()
-        data = amount_bytes + struct.pack('B', len(script_bytes)) + script_bytes
+        data = amount_bytes + encode_var_int(len(script_bytes)) + script_bytes
         return data
 
 
@@ -418,7 +414,7 @@ class Transaction:
         # of Bitcoin stored sighash as an integer (which serializes as a 4
         # bytes), i.e. it should be converted to one byte before serialization.
         # It is converted to 1 byte before serializing to send to the network
-        tx_for_signing += struct.pack('<i', sighash)
+        tx_for_signing += (sighash).to_bytes(4, byteorder="little")
 
         # create transaction digest -- note double hashing
         tx_digest = hashlib.sha256( hashlib.sha256(tx_for_signing).digest()).digest()
@@ -469,8 +465,7 @@ class Transaction:
         if not anyone_can_pay:
             hash_prevouts = b''
             for txin in tmp_tx.inputs:
-                hash_prevouts += unhexlify(txin.txid)[::-1] + \
-                                    struct.pack('<L', txin.txout_index)
+                hash_prevouts += (int(txin.txid,16)).to_bytes(32, byteorder="little") + (txin.txout_index).to_bytes(4, byteorder="little")
             hash_prevouts = hashlib.sha256(hashlib.sha256(hash_prevouts).digest()).digest()
 
         # Hash all input sequence
@@ -484,16 +479,16 @@ class Transaction:
             # Hash all output
             hash_outputs = b''
             for txout in tmp_tx.outputs:
-                amount_bytes = struct.pack('<q', txout.amount)
+                amount_bytes = (txout.amount).to_bytes(8, byteorder="little")
                 script_bytes = txout.script_pubkey.to_bytes()
-                hash_outputs += amount_bytes + struct.pack('B', len(script_bytes)) + script_bytes
+                hash_outputs += amount_bytes + encode_var_int(len(script_bytes)) + script_bytes
             hash_outputs = hashlib.sha256(hashlib.sha256(hash_outputs).digest()).digest()
         elif basic_sig_hash_type == SIGHASH_SINGLE and txin_index < len(tmp_tx.outputs):
             # Hash one output
             txout = tmp_tx.outputs[txin_index]
-            amount_bytes = struct.pack('<q', txout.amount)
+            amount_bytes = (txout.amount).to_bytes(8, byteorder="little")
             script_bytes = txout.script_pubkey.to_bytes()
-            hash_outputs = amount_bytes + struct.pack('B', len(script_bytes)) + script_bytes
+            hash_outputs = amount_bytes + encode_var_int(len(script_bytes)) + script_bytes
             hash_outputs = hashlib.sha256(hashlib.sha256(hash_outputs).digest()).digest()
 
         # add sighash bytes to be hashed
@@ -504,15 +499,14 @@ class Transaction:
 
         # add tx txin
         txin = self.inputs[txin_index]
-        tx_for_signing += unhexlify(txin.txid)[::-1] + \
-                          struct.pack('<L', txin.txout_index)
+        tx_for_signing += (int(txin.txid,16)).to_bytes(32, byteorder="little") + (txin.txout_index).to_bytes(4, byteorder="little")
 
         # add tx sign
-        tx_for_signing += struct.pack('B', len(script.to_bytes()))
+        tx_for_signing += encode_var_int(len(script.to_bytes()))
         tx_for_signing += script.to_bytes()
 
         # add txin amount
-        tx_for_signing += struct.pack('<q', amount)
+        tx_for_signing += (amount).to_bytes(8, byteorder="little")
 
         # add tx sequence
         tx_for_signing += txin.sequence
@@ -524,7 +518,7 @@ class Transaction:
         tx_for_signing += self.locktime
 
         # add sighash type
-        tx_for_signing += struct.pack('<i', sighash)
+        tx_for_signing += (sighash).to_bytes(4, byteorder="little")
 
         return hashlib.sha256(hashlib.sha256(tx_for_signing).digest()).digest()
 
@@ -539,8 +533,8 @@ class Transaction:
             # flag
             data += b'\x01'
 
-        txin_count_bytes = chr(len(self.inputs)).encode()
-        txout_count_bytes = chr(len(self.outputs)).encode()
+        txin_count_bytes = encode_var_int(len(self.inputs))
+        txout_count_bytes = encode_var_int(len(self.outputs))
         data += txin_count_bytes
         for txin in self.inputs:
             data += txin.stream()
@@ -550,7 +544,7 @@ class Transaction:
         if has_segwit:
             for witness in self.witnesses:
                 # add witnesses script Count
-                witnesses_count_bytes = chr(len(witness.script)).encode()
+                witnesses_count_bytes = encode_var_int(len(witness.script))
                 data += witnesses_count_bytes
                 data += witness.to_bytes(True)
         data += self.locktime
@@ -609,7 +603,7 @@ class Transaction:
         # count witnesses data
         for witness in self.witnesses:
             # add witnesses script Count
-            witnesses_count_bytes = chr(len(witness.script)).encode()
+            witnesses_count_bytes = encode_var_int(len(witness.script))
             data = witnesses_count_bytes
             data += witness.to_bytes(True)
         wit_size = len(data)

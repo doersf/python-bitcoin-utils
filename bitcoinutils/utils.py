@@ -11,39 +11,27 @@
 
 from binascii import hexlify, unhexlify
 from bitcoinutils.constants import SATOSHIS_PER_BITCOIN
-
+from decimal import Decimal
 
 
 '''
 Converts from any number type (int/float/Decimal) to satoshis (int)
 '''
 def to_satoshis(num):
-    # we need to round because of how floats are stored insternally:
-    # e.g. 0.29 * 100000000 = 28999999.999999996
-    return int( round(num * SATOSHIS_PER_BITCOIN) )
+    if (isinstance(num, str) == False):
+        raise Exception("Must specify a string for to_satoshis")
+
+    return int(Decimal(num) * Decimal("100000000"))
 
 
 '''
 Counts bytes and returns them with their compact size (or varint) prepended.
-Accepts bytes and returns bytes. The length should be specified in
-little-endian (which is why we reverse the array bytes).
+Accepts bytes and returns bytes.
 
 https://bitcoin.org/en/developer-reference#compactsize-unsigned-integers
 '''
 def prepend_compact_size(data):
-    prefix = b''
-    size = len(data)
-    if size >= 0 and size <= 252:
-        prefix = unhexlify(format(size, '02x').encode())
-    elif size >= 253 and size <= 0xffff:
-        prefix = b'\xfd' + unhexlify(format(size, '04x'))[::-1]
-    elif size >= 0x10000 and size <= 0xffffffff:
-        prefix = b'\xfe' + unhexlify(format(size, '08x'))[::-1]
-    elif size >= 0x100000000 and size <= 0xffffffffffffffff:
-        prefix = b'\xff' + unhexlify(format(size, '016x'))[::-1]
-    else:
-        raise ValueError("Data size not between 0 and 0xffffffffffffffff")
-
+    prefix = encode_var_int(len(data))
     return prefix + data
 
 
@@ -59,3 +47,21 @@ def is_address_bech32(address):
     return False
 
 
+def encode_var_int(i):
+    """ Encodes integers into variable length integers, which are used in
+        Bitcoin in order to save space.
+    """
+    if not isinstance(i, int) and not isinstance(i, long):
+        raise Exception('i must be an integer')
+    
+    if i <= 0xfc:
+        return (i).to_bytes(1, byteorder="little")
+    elif i <= 0xffff:
+        return b'\xfd' + (i).to_bytes(2, byteorder="little")
+    elif i <= 0xffffffff:
+        return b'\xfe' + (i).to_bytes(4, byteorder="little")
+    elif i <= 0xffffffffffffffff:
+        return b'\xff' + (i).to_bytes(8, byteorder="little")
+    else:
+        raise Exception('Integer cannot exceed 8 bytes in length.')
+    

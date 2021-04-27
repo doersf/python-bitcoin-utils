@@ -28,7 +28,7 @@ def main():
     print(fromAddress.to_string())
 
     # amount is needed to sign the segwit input
-    fromAddressAmount = to_satoshis(0.01)
+    fromAddressAmount = to_satoshis('0.01')
 
     # UTXO of fromAddress
     txid = '13d2d30eca974e8fa5da11b9608fa36905a22215e8df895e767fc903889367ff'
@@ -44,7 +44,7 @@ def main():
                           'OP_EQUALVERIFY', 'OP_CHECKSIG'])
 
     # create transaction output
-    txOut = TxOutput(to_satoshis(0.009), toAddress.to_script_pub_key())
+    txOut = TxOutput(to_satoshis('0.009'), toAddress.to_script_pub_key())
 
     # create transaction without change output - if at least a single input is
     # segwit we need to set has_segwit=True

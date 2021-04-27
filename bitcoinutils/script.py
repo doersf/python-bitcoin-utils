@@ -9,7 +9,6 @@
 # propagated, or distributed except according to the terms contained in the
 # LICENSE file.
 
-import struct
 import copy
 import hashlib
 from bitcoinutils.utils import prepend_compact_size
@@ -179,30 +178,17 @@ class Script:
 
 
     def _op_push_data(self, data):
-        """Converts data to appropriate OP_PUSHDATA OP code including length
-
-        0x01-0x4b           -> just length plus data bytes
-        0x4c-0xff           -> OP_PUSHDATA1 plus 1-byte-length plus data bytes
-        0x0100-0xffff       -> OP_PUSHDATA2 plus 2-byte-length plus data bytes
-        0x010000-0xffffffff -> OP_PUSHDATA4 plus 4-byte-length plus data bytes
-
-        Also note that according to standarardness rules (BIP-62) the minimum
-        possible PUSHDATA operator must be used!
-        """
-
-        # expects data in hexadecimal characters and converts appropriately
-        # TODO maybe, for convenience, also accept objects for public keys,
-        # addresses, etc. and use isinstance and convert manually
+        
         data_bytes = unhexlify(data)
-
+        
         if len(data_bytes) < 0x4c:
-            return chr(len(data_bytes)).encode() + data_bytes
+            return (len(data_bytes)).to_bytes(1, byteorder="little") + data_bytes
         elif len(data_bytes) < 0xff:
-            return b'\x4c' + chr(len(data_bytes)).encode() + data_bytes
+            return OP_CODES['OP_PUSHDATA1'] + (len(data_bytes)).to_bytes(1, byteorder="little") + data_bytes
         elif len(data_bytes) < 0xffff:
-            return b'\x4d' + struct.pack('<H', len(data_bytes)) + data_bytes
+            return OP_CODES['OP_PUSHDATA2'] + (len(data_bytes)).to_bytes(2, byteorder="little") + data_bytes
         elif len(data_bytes) < 0xffffffff:
-            return b'\x4e' + struct.pack('<I', len(data_bytes)) + data_bytes
+            return OP_CODES['OP_PUSHDATA4'] + (len(data_bytes)).to_bytes(4, byteorder="little") + data_bytes
         else:
             raise ValueError("Data too large. Cannot push into script")
 

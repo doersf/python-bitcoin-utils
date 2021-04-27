@@ -33,13 +33,13 @@ def main():
     # set values
     txid = '2042195c40a92353f2ffe30cd0df8d177698560e81807e8bf9174a9c0e98e6c2'
     vout = 0
-    amount = to_satoshis(0.01)
+    amount = to_satoshis('0.01')
 
     # create transaction input from tx id of UTXO
     txin = TxInput(txid, vout)
 
-    txOut1 = TxOutput(to_satoshis(0.0001), toAddress.to_script_pub_key())
-    txOut2 = TxOutput(to_satoshis(0.0098), fromAddress.to_script_pub_key())
+    txOut1 = TxOutput(to_satoshis('0.0001'), toAddress.to_script_pub_key())
+    txOut2 = TxOutput(to_satoshis('0.0098'), fromAddress.to_script_pub_key())
 
     tx = Transaction([txin], [txOut1, txOut2], has_segwit=True)
 

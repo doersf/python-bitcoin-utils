@@ -34,7 +34,7 @@ def main():
     redeem_script = Script([p2pk_pk, 'OP_CHECKSIG'])
 
     to_addr = P2pkhAddress('n4bkvTyU1dVdzsrhWBqBw8fEMbHjJvtmJR')
-    txout = TxOutput(to_satoshis(0.09), to_addr.to_script_pub_key() )
+    txout = TxOutput(to_satoshis('0.09'), to_addr.to_script_pub_key() )
 
     # no change address - the remaining 0.01 tBTC will go to miners)
 

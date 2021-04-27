@@ -345,7 +345,7 @@ class PrivateKey:
                         struct.pack('BB', der_type_int, length_s) + new_S
 
         # add sighash in the signature -- as one byte!
-        signature += struct.pack('B', sighash)
+        signature += (sighash).to_bytes(1, byteorder="big")
 
         # note that this is the final sig that needs to be added in the
         # script_sig (i.e. the DER signature plus the sighash)
