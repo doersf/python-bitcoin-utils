@@ -13,7 +13,7 @@ from binascii import hexlify, unhexlify
 from bitcoinutils.constants import SATOSHIS_PER_BITCOIN
 from decimal import Decimal, getcontext
 
-getcontext().prec = 8
+getcontext().prec = 28
 
 '''
 Converts from any number type (int/float/Decimal) to satoshis (int)
