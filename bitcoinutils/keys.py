@@ -416,9 +416,32 @@ class PublicKey:
             # remove first byte and instantiate ecdsa key
             self.key = VerifyingKey.from_string(hex_bytes[1:], curve=SECP256k1)
         else:
-            # compressed - let the ECDSA do its thing
-            self.key = VerifyingKey.from_string(hex_bytes, curve=SECP256k1)
+            # compressed - SEC FORMAT: 0x02|0x03 + x coordinate (if 02 then y
+            # is even else y is odd. Calculate y and then instantiate the ecdsa key
+            x_coord = int( hex_str[2:], 16 )
+            
+            # y = modulo_square_root( (x**3 + 7) mod p ) -- there will be 2 y values
+            y_values = sqrt_mod( (x_coord**3 + 7) % _p, _p, True )
+            
+            # check SEC format's first byte to determine which of the 2 values to use
+            if first_byte_in_hex == '02':
+                # y is the even value
+                if y_values[0] % 2 == 0:
+                    y_coord = y_values[0]
+                else:
+                    y_coord = y_values[1]
+            elif first_byte_in_hex == '03':
+                # y is the odd value
+                if y_values[0] % 2 == 0:
+                    y_coord = y_values[1]
+                else:
+                    y_coord = y_values[0]
+            else:
+                raise TypeError("Invalid SEC compressed format")
 
+            uncompressed_hex = "%0.64X%0.64X" % (x_coord, y_coord)
+            uncompressed_hex_bytes = unhexlify(uncompressed_hex)
+            self.key = VerifyingKey.from_string(uncompressed_hex_bytes, curve=SECP256k1)
 
     @classmethod
     def from_hex(cls, hex_str):
