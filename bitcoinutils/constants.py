@@ -9,6 +9,8 @@
 # propagated, or distributed except according to the terms contained in the
 # LICENSE file.
 
+import re
+
 # TODO organise constants in sections
 
 NETWORK_DEFAULT_PORTS = { 'mainnet': 8332,
@@ -61,3 +63,4 @@ DEFAULT_TX_VERSION  = b'\x02\x00\x00\x00'
 SATOSHIS_PER_BITCOIN = 100000000
 NEGATIVE_SATOSHI = 0xffffffffffffffff
 
+AMOUNT_REGEX = re.compile(r'^[0-9]{1,10}(\.[0-9]{1,8})?$')
