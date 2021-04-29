@@ -10,9 +10,8 @@
 # LICENSE file.
 
 from binascii import hexlify, unhexlify
-from bitcoinutils.constants import SATOSHIS_PER_BITCOIN
+from bitcoinutils.constants import SATOSHIS_PER_BITCOIN, AMOUNT_REGEX
 from decimal import Decimal, localcontext
-from constants import AMOUNT_REGEX
 
 '''
 Converts from any number type (int/float/Decimal) to satoshis (int)
