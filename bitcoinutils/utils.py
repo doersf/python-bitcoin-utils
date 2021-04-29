@@ -11,9 +11,7 @@
 
 from binascii import hexlify, unhexlify
 from bitcoinutils.constants import SATOSHIS_PER_BITCOIN
-from decimal import Decimal, getcontext
-
-getcontext().prec = 28
+from decimal import Decimal, localcontext
 
 '''
 Converts from any number type (int/float/Decimal) to satoshis (int)
@@ -22,7 +20,9 @@ def to_satoshis(num):
     if (isinstance(num, str) == False):
         raise Exception("Must specify a string for to_satoshis")
 
-    return int(Decimal(num) * Decimal("100000000"))
+    with localcontext() as ctx:
+        ctx.prec = 28
+        return int(Decimal(num) * Decimal("100000000"))
 
 
 '''
