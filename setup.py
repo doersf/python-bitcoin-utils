@@ -10,7 +10,7 @@ from bitcoinutils import __version__
 with open('README.rst') as readme:
     long_description = readme.read()
 
-setup(name='bitcoin-utils',
+setup(name='bitcoin-utils-fork-minimal',
       version=__version__,
       description='Bitcoin utility functions',
       long_description=long_description,
