@@ -15,7 +15,7 @@ import hashlib
 from abc import ABC, abstractmethod
 from base64 import b64encode, b64decode
 from binascii import unhexlify, hexlify
-from base58check import b58encode, b58decode
+from base58 import b58encode, b58decode
 from ecdsa import SigningKey, VerifyingKey, SECP256k1, ellipticcurve, numbertheory
 from ecdsa.util import sigencode_string, sigdecode_string, sigencode_der
 from sympy.ntheory import sqrt_mod

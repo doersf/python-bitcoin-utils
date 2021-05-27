@@ -20,7 +20,7 @@ setup(name='bitcoin-utils-fork-minimal',
       license='AGPLv3',
       keywords='bitcoin library utilities tools',
       install_requires=[
-          'base58check==1.0.2',
+          'base58==2.1.0',
           'ecdsa==0.16.1',
           'sympy==1.3'
       ],
