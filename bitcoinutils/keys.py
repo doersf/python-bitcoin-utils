@@ -23,7 +23,7 @@ from sympy.ntheory import sqrt_mod
 from bitcoinutils.constants import NETWORK_WIF_PREFIXES, \
         NETWORK_P2PKH_PREFIXES, NETWORK_P2SH_PREFIXES, SIGHASH_ALL, \
         P2PKH_ADDRESS, P2SH_ADDRESS, P2WPKH_ADDRESS_V0, P2WSH_ADDRESS_V0, \
-        NETWORK_SEGWIT_PREFIXES
+        NETWORK_SEGWIT_PREFIXES, P2TR_ADDRESS_V1
 from bitcoinutils.setup import get_network
 import bitcoinutils.bech32
 import bitcoinutils.script
@@ -929,6 +929,8 @@ class SegwitAddress(ABC):
         self.version = version
         if self.version == P2WPKH_ADDRESS_V0 or self.version == P2WSH_ADDRESS_V0:
             self.segwit_num_version = 0
+        elif self.version == P2TR_ADDRESS_V1:
+            self.segwit_num_version = 1
 
         if witness_hash:
             self.witness_hash = witness_hash
@@ -1075,6 +1077,35 @@ class P2wshAddress(SegwitAddress):
         """Returns the type of address"""
         return self.version
 
+class P2trAddress(SegwitAddress):
+    """Encapsulates a P2TR address.
+
+    Check Address class for details
+
+    Methods
+    -------
+    from_script(witness_script)
+        instantiates an object from a witness_script
+    get_type()
+        returns the type of address
+    """
+
+    def __init__(self, address=None, witness_hash=None, script=None,
+                 version=P2TR_ADDRESS_V1):
+        """Allow creation only from hash160 of public key"""
+
+        super().__init__(address=None, witness_hash=None, script=script,
+                         version=version)
+
+
+    def to_script_pub_key(self):
+        """Returns the scriptPubKey of a P2WPKH witness script"""
+        return bitcoinutils.script.Script(['OP_1', self.to_hash()])
+
+
+    def get_type(self):
+        """Returns the type of address"""
+        return self.version
 
 
 def main():
