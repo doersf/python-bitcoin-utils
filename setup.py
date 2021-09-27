@@ -21,7 +21,7 @@ setup(name='bitcoin-utils-fork-minimal',
       keywords='bitcoin library utilities tools',
       install_requires=[
           'base58==2.1.0',
-          'ecdsa==0.16.1',
+          'ecdsa==0.17.0',
           'sympy==1.3'
       ],
       packages=['bitcoinutils'],
