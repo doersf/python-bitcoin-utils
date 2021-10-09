@@ -22,7 +22,7 @@ setup(name='bitcoin-utils-fork-minimal',
       install_requires=[
           'base58==2.1.0',
           'ecdsa==0.17.0',
-          'sympy==1.3'
+          'sympy==1.9'
       ],
       packages=['bitcoinutils'],
       #package_data={
