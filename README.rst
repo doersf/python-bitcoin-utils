@@ -14,7 +14,7 @@ Installation
 ------------
 Python version 3 is required. Then just install with:
 
-$ pip install bitcoin-utils
+$ pip install bitcoin-utils-fork-minimal
 
 Examples
 --------
