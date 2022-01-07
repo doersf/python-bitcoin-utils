@@ -17,7 +17,7 @@ setup(name='bitcoin-utils-fork-minimal',
       author='Konstantinos Karasavvas',
       author_email='kkarasavvas@gmail.com',
       url='https://github.com/doersf/python-bitcoin-utils',
-      license='AGPLv3',
+      license='MIT',
       keywords='bitcoin library utilities tools',
       install_requires=[
           'base58==2.1.0',
