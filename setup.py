@@ -1,12 +1,6 @@
 from setuptools import setup
 from bitcoinutils import __version__
 
-#with open('requirements.txt') as f:
-#    requirements = f.read().splitlines()
-
-#install_reqs = parse_requirements('requirements.txt', session=False)
-#requirements = [str(ir.req) for ir in install_reqs]
-
 with open('README.rst') as readme:
     long_description = readme.read()
 
@@ -20,15 +14,11 @@ setup(name='bitcoin-utils-fork-minimal',
       license='AGPLv3',
       keywords='bitcoin library utilities tools',
       install_requires=[
-          'base58==2.1.0',
-          'ecdsa==0.17.0',
-          'sympy==1.9'
+          'base58>=2.1,<2.2',
+          'ecdsa==0.18.0',
+          'sympy>=1.7,<2.0'
       ],
       packages=['bitcoinutils'],
-      #package_data={
-      #    'bitcoinutils': ['requirements.txt']
-      #},
-      #include_package_data=True,
       zip_safe=False
      )
 
